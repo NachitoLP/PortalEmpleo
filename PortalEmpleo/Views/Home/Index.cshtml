@@ -2,5 +2,53 @@
     ViewData["Title"] = "Home Page";
 }
 
+<header class="container-fluid header">
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+        <div class="container-fluid">
+            <h3 class="navbar-brand">LinkedOut</h3>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" asp-area="" asp-controller="Employments" asp-action="Index">Employments</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                    </li>
+                </ul>
+                @* <form class="d-flex" asp-controller="Employments" role="search" asp-action="Index">
+                    <input class="form-control me-2" placeholder="Buscar..." aria-label="search" name="search">
+                    <button class="btn btn-outline-success" style="color:white; border:none;" type="submit"><span class="material-symbols-outlined">search</span></button>
+                </form> *@
+
+                <div class="icons_header_login">
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <a asp-controller="Logout" asp-action="Index">
+                            <div class="nav_login">
+                                <span class="material-symbols-outlined">logout</span>
+                                <label>Salir</label>
+                            </div>
+                        </a>
+                    }
+                    else
+                    {
+                        <a asp-controller="Login" asp-action="Index">
+                            <div class="nav_login">
+                                <span class="material-symbols-outlined">person</span>
+                                <label>Ingresar</label>
+                            </div>
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+    </nav>
+</header>
+
 <h2>Welcome</h2>
-<a asp-controller="Login" asp-action="Index">Log In</a>

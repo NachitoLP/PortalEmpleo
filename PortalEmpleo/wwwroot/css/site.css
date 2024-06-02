@@ -99,12 +99,10 @@ body {
 }
 
 .login {
-    width: 320px;
     padding: 30px;
     padding-top: 156px;
 }
 .login_rg {
-    width: 320px;
     padding: 30px;
     padding-top: 80px;
 }
@@ -137,19 +135,21 @@ body {
         outline: none;
         border-bottom-color: #6A679E;
     }
-
+.button {
+    justify-content:center;
+}
 .login__submit {
     background: #fff;
     font-size: 14px;
-    margin-top: 30px;
     padding: 16px 20px;
     border-radius: 26px;
     border: 1px solid #D4D3E8;
     text-transform: uppercase;
     font-weight: 700;
     display: flex;
+    margin:20px auto 0px;
     align-items: center;
-    width: 100%;
+    width: 90%;
     color: #4C489D;
     box-shadow: 0px 2px 2px #5C5696;
     cursor: pointer;
@@ -200,7 +200,6 @@ body {
 .lg_no_account {
     margin:auto;
     text-align:center;
-    margin-top: 40px;
     max-width: 320px;
     padding:30px;
 }
@@ -210,3 +209,33 @@ body {
     .lg_no_account p a{
         color: lightblue;
     }
+
+.icons_header_login {
+    position: relative;
+    right: 0px;
+    display: flex;
+    margin: 10px 15px;
+}
+
+.icons_header_login a
+{
+    margin: 0px 15px;
+    text-decoration:none;
+}
+    .icons_header_login a :hover {
+        transition: all 0.2s ease-in-out;
+        color: #D4D3E8;
+        cursor: pointer;
+    }
+
+.icons_header_login a div{
+    color: rgb(255, 255, 255);
+    height: fit-content;
+    font-weight: bold;
+    transition: all 0.3s ease-in-out;
+}
+
+.icons_header_login span {
+    display: block;
+    text-align: center;
+}

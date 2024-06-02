@@ -1,22 +1,24 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Data.SqlClient;
 using PortalEmpleo.Models;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication;
+using System.Security.Claims;
 
 namespace PortalEmpleo.Controllers
 {
 	public class LoginController : Controller
 	{
 		private string cstring = "DESKTOP-9NLV2TR\\MSSQLSERVER10";
-		private string csdb = "PortalEmpleo";
+		private string csdb = "PortalEmpleoEFC";
 
 		public IActionResult Index()
 		{
 			return View();
 		}
 		[HttpPost]
-		public IActionResult Index(string email, string password)
+		public async Task<IActionResult> Index(string user_email, string user_password)
 		{
-			bool checkUser = false;
 			var user = new User();
 
 			SqlConnectionStringBuilder connectionString = new();
@@ -31,39 +33,38 @@ namespace PortalEmpleo.Controllers
 				connection.Open();
 
 				SqlCommand cmd = connection.CreateCommand();
-				cmd.CommandText = $"[LoginUser] @email = '{email}', @password = '{password}'";
+				cmd.CommandText = $"[LoginUser] @user_email = '{user_email}', @user_password = '{user_password}'";
 
 				var reader = cmd.ExecuteReader();
 				if (reader.HasRows)
 				{
 					while (reader.Read())
 					{
-						checkUser = true;
-
-						//user.id_user = (int)reader["id_user"];
-						//user.name = (string)reader["name"];
-						//user.surname = (string)reader["surname"];
-						//user.email = (string)reader["email"];
-						//user.birth_date = (DateTime)reader["birth_date"];
-						//user.age = (int)reader["age"];
-						//user.role = (string)reader["role"];
+						user.UserName = (string)reader["user_name"];
+						user.UserEmail = (string)reader["user_email"];
+						user.RoleDescription = (string)reader["role_description"];
 					}
 					reader.Close();
-				}
-			}
-			string jsonResponse = "";
 
-			if(checkUser)
-			{
-				
-				return RedirectToAction("Home", "Index");
-			}
-			else
-			{
-				jsonResponse = "{\"status\": 500, \"data\": \"ERROR, el usuario no existe en la BD\"}";
-			}
+                    var claims = new List<Claim>
+                    {
+                        new Claim(ClaimTypes.Name, user.UserName),
+                        new Claim("Correo", user.UserEmail),
+                        new Claim(ClaimTypes.Role, user.RoleDescription)
+                    };
 
-			return Json(jsonResponse);
+                    var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+                    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
+
+                    return RedirectToAction("Index", "Home");
+                }
+				else
+				{
+                    string jsonResponse = "{\"status\": 500, \"data\": \"ERROR, el usuario no existe en la BD\"}";
+                    return Json(jsonResponse);
+                }
+			}
 		}
 	}
 }
