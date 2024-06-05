@@ -4,13 +4,14 @@ using PortalEmpleo.Models;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication;
 using System.Security.Claims;
+using System.Data;
 
 namespace PortalEmpleo.Controllers
 {
 	public class LoginController : Controller
 	{
-		private string cstring = "DESKTOP-9NLV2TR\\MSSQLSERVER10";
-		private string csdb = "PortalEmpleoEFC";
+		private string cstring = "FX-NB-001\\MSSQLSERVER02";
+		private string csdb = "PortalEmpleo";
 
 		public IActionResult Index()
 		{
@@ -33,7 +34,10 @@ namespace PortalEmpleo.Controllers
 				connection.Open();
 
 				SqlCommand cmd = connection.CreateCommand();
-				cmd.CommandText = $"[LoginUser] @user_email = '{user_email}', @user_password = '{user_password}'";
+				cmd.CommandText = "LoginUser";
+				cmd.CommandType = CommandType.StoredProcedure;
+				cmd.Parameters.AddWithValue("@user_email", user_email);
+				cmd.Parameters.AddWithValue("@user_password", user_password);
 
 				var reader = cmd.ExecuteReader();
 				if (reader.HasRows)

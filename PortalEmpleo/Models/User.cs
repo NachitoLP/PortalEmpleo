@@ -29,7 +29,7 @@ namespace PortalEmpleo.Models
             Companies.Add(company);
         }
 
-        static int CalculateAge(DateTime user_birth_date)
+        public int CalculateAge(DateTime user_birth_date)
 		{
 			DateTime actualDate = DateTime.Today;
 			int user_age = actualDate.Year - user_birth_date.Year;

@@ -5,13 +5,14 @@ using System.Data.SqlClient;
 using PortalEmpleo.Models;
 using System.Security.Claims;
 using System.Data;
+using PortalEmpleo.Utils;
 
 namespace PortalEmpleo.Controllers
 {
 	public class RegisterController : Controller
 	{
-		private string cstring = "DESKTOP-9NLV2TR\\MSSQLSERVER10";
-		private string csdb = "PortalEmpleoEFC";
+		private string cstring = "FX-NB-001\\MSSQLSERVER02";
+		private string csdb = "PortalEmpleo";
 		public IActionResult Index()
 		{
 			SqlConnectionStringBuilder connectionString = new();
@@ -84,17 +85,20 @@ namespace PortalEmpleo.Controllers
 				RoleDescription = selectedRole
 			};
 
+			user.UserAge = UserUtils.CalculateAge(user.UserBirthDate);
+
 			using (SqlConnection connection = new SqlConnection(cs))
 			{
 				connection.Open();
 
-				SqlCommand cmd = new SqlCommand("INSERT INTO dbo.Users(user_name, user_surname, user_email, user_password, user_birth_date, role_description) VALUES(@UserName, @UserSurname, @UserEmail, @UserPassword, @UserBirthDate, @RoleDescription)", connection);
+				SqlCommand cmd = new SqlCommand("INSERT INTO dbo.Users(user_name, user_surname, user_email, user_password, user_birth_date, role_description, user_age) VALUES(@UserName, @UserSurname, @UserEmail, @UserPassword, @UserBirthDate, @RoleDescription, @UserAge)", connection);
 				cmd.Parameters.AddWithValue("@UserName", user.UserName);
 				cmd.Parameters.AddWithValue("@UserSurname", user.UserSurname);
 				cmd.Parameters.AddWithValue("@UserEmail", user.UserEmail);
 				cmd.Parameters.AddWithValue("@UserPassword", user.UserPassword);
 				cmd.Parameters.AddWithValue("@UserBirthDate", user.UserBirthDate);
 				cmd.Parameters.AddWithValue("@RoleDescription", user.RoleDescription);
+				cmd.Parameters.AddWithValue("@UserAge", user.UserAge);
 				cmd.ExecuteNonQuery();
 
 				connection.Close();

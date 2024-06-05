@@ -1,4 +1,9 @@
-﻿CREATE TABLE Role (
+﻿CREATE DATABASE PortalEmpleo
+GO
+
+USE PortalEmpleo
+
+CREATE TABLE Role (
 	role_description varchar(30) PRIMARY KEY
 )
 
@@ -55,3 +60,10 @@ CREATE PROCEDURE [dbo].[LoginUser]
 AS
 	SELECT * FROM dbo.Users WHERE user_email = @user_email and user_password = @user_password
 GO
+
+CREATE PROCEDURE [dbo].[GetUserByEmail]
+	@user_email nvarchar(150)
+AS
+	SELECT * FROM dbo.Users WHERE user_email = @user_email
+
+INSERT INTO dbo.Role VALUES('Desempleado'),('Empresa')
