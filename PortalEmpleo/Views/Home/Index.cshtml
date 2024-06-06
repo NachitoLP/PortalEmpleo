@@ -29,6 +29,12 @@
                 <div class="icons_header_login">
                     @if (User.Identity.IsAuthenticated)
                     {
+                        <a asp-controller="Profile" asp-action="Index">
+                            <div class="nav_login">
+                                <span class="material-symbols-outlined">person</span>
+                                <label>Mi Perfil</label>
+                            </div>
+                        </a>
                         <a asp-controller="Logout" asp-action="Index">
                             <div class="nav_login">
                                 <span class="material-symbols-outlined">logout</span>

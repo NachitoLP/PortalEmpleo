@@ -1,4 +1,6 @@
-﻿namespace PortalEmpleo.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace PortalEmpleo.Models
 {
     public class UserProfileViewModel
     {
@@ -6,9 +8,10 @@
         public string UserSurname { get; set; }
         public string UserEmail { get; set; }
         public DateTime UserBirthDate { get; set; }
-        public string UserProfileImg { get; set; }
+        public byte[] UserProfileImg { get; set; }
         public string RoleDescription { get; set; }
 
-        // Otras propiedades necesarias para la vista de perfil
+        //[Display(Name = "Seleccionar nueva imagen de perfil")]
+        public IFormFile NewProfileImage { get; set; }
     }
 }

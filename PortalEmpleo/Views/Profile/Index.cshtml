@@ -8,11 +8,11 @@
 @if (ViewData.ModelState.ContainsKey(""))
 {
     <div class="alert alert-danger" role="alert">
-        @Html.ValidationSummary(false, "", new { @class = "text-danger" })
+        @Html.ValidationSummary(false, null, new { @class = "text-danger" })
     </div>
 }
 
-<form asp-action="Index" method="post">
+<form asp-action="Index" method="post" enctype="multipart/form-data">
     <div class="form-group">
         <label asp-for="UserName">Nombre:</label>
         <input asp-for="UserName" class="form-control" />
@@ -33,8 +33,18 @@
 
     <div class="form-group">
         <label asp-for="UserProfileImg">Imagen de Perfil:</label>
-        <input asp-for="UserProfileImg" class="form-control" />
-        <span asp-validation-for="UserProfileImg" class="text-danger"></span>
+        @if (Model.UserProfileImg != null)
+        {
+            <img src="data:image;base64,@Convert.ToBase64String(Model.UserProfileImg)" />
+        }
+        else{
+            <img src="Images/perfil_df.jpg" />
+        }
+    </div>
+    <div class="form-group">
+        <label asp-for="NewProfileImage">Seleccionar nueva imagen de perfil:</label>
+        <input type="file" asp-for="NewProfileImage" class="form-control-file" />
+        @* <span asp-validation-for="NewProfileImage" class="text-danger"></span> *@
     </div>
 
     <div class="form-group">

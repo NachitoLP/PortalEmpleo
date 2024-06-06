@@ -18,7 +18,7 @@ CREATE TABLE Users (
 	user_email nvarchar(150) NOT NULL,
 	user_password nvarchar(16) NOT NULL,
 	user_birth_date date NOT NULL,
-	user_profile_img varchar(255),
+	user_profile_img VARBINARY(MAX),
 	user_age int,
 	role_description varchar(30) NOT NULL,
 	FOREIGN KEY (role_description) REFERENCES Role(role_description)

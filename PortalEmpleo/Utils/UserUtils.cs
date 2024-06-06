@@ -12,4 +12,15 @@
             return user_age;
         }
     }
+
+    public static class UserUtils2
+    {
+        public static byte[] ObtenerBytesImagenDefault()
+        {
+            string rutaImagenDefault = "wwwroot/Images/perfil_df.jpg"; // Ruta local en tu sistema de archivos
+            byte[] bytesImagenDefault = File.ReadAllBytes(rutaImagenDefault);
+
+            return bytesImagenDefault;
+        }
+    }
 }
