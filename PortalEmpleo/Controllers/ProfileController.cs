@@ -8,6 +8,8 @@ using PortalEmpleo.Models;
 using PortalEmpleo.Utils;
 using System.Data;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.AspNetCore.Identity;
 
 namespace PortalEmpleo.Controllers
 {
@@ -16,6 +18,36 @@ namespace PortalEmpleo.Controllers
 	{
 		private string cstring = "FX-NB-001\\MSSQLSERVER02";
 		private string csdb = "PortalEmpleo";
+
+        private List<string> ObtenerRoles()
+        {
+            SqlConnectionStringBuilder connectionString = new();
+            connectionString.DataSource = cstring;
+            connectionString.InitialCatalog = csdb;
+            connectionString.IntegratedSecurity = true;
+
+            var cs = connectionString.ConnectionString;
+
+            List<string> userRoles = new List<string>();
+            using (SqlConnection connectionRole = new SqlConnection(cs))
+            {
+                connectionRole.Open();
+
+                string sqlQuery = "SELECT role_description FROM dbo.Role";
+
+                SqlCommand cmdRole = new SqlCommand(sqlQuery, connectionRole);
+                var readerRole = cmdRole.ExecuteReader();
+
+                while (readerRole.Read())
+                {
+                    string roleDescription = (string)readerRole["role_description"];
+                    userRoles.Add(roleDescription);
+                }
+
+                readerRole.Close();
+            }
+            return userRoles;
+        }
 
         public IActionResult Index()
 		{
@@ -43,7 +75,7 @@ namespace PortalEmpleo.Controllers
 
 					var reader = cmd.ExecuteReader();
 
-					while (reader.Read())
+                    while (reader.Read())
 					{
 						user.UserName = (string)reader["user_name"];
 						user.UserSurname = (string)reader["user_surname"];
@@ -64,8 +96,21 @@ namespace PortalEmpleo.Controllers
 					}
 					reader.Close();
 
-					return View(user);
-				}
+                    UserProfileViewModel viewModel = new UserProfileViewModel
+                    {
+                        UserName = user.UserName,
+                        UserSurname = user.UserSurname,
+                        UserEmail = user.UserEmail,
+                        UserBirthDate = user.UserBirthDate,
+                        UserProfileImg = user.UserProfileImg,
+                        RoleDescription = user.RoleDescription
+                    };
+
+                    List<string> userRoles = ObtenerRoles();
+                    viewModel.Roles = userRoles;
+
+                    return View(viewModel);
+                }
 			}
 			catch (Exception ex) {
 				Console.WriteLine(ex.Message);
@@ -88,30 +133,40 @@ namespace PortalEmpleo.Controllers
             {
                 var userEmail = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "Correo")?.Value;
 
-                var newProfileImage = model.NewProfileImage;
-
-                if (newProfileImage != null)
+                // Verifica si el usuario ha proporcionado una nueva imagen de perfil
+                string sqlQuery;
+                if (model.NewProfileImage != null)
                 {
-                    // Leer el contenido del archivo de imagen y convertirlo a un arreglo de bytes
-                    using (var memoryStream = new MemoryStream())
-                    {
-                        await newProfileImage.CopyToAsync(memoryStream);
-                        model.UserProfileImg = memoryStream.ToArray();
-                    }
+                    // Si hay una nueva imagen de perfil, actualiza la consulta SQL para incluir la imagen de perfil
+                    sqlQuery = "UPDATE dbo.Users SET user_name = @NewUserName, user_surname = @NewUserSurname, user_birth_date = @NewUserBD, user_profile_img = @NewUserPI, role_description = @NewUserRole WHERE user_email = @UserEmail";
                 }
+                else
+                {
+                    // Si no hay una nueva imagen de perfil, actualiza la consulta SQL para omitir la imagen de perfil
+                    sqlQuery = "UPDATE dbo.Users SET user_name = @NewUserName, user_surname = @NewUserSurname, user_birth_date = @NewUserBD, role_description = @NewUserRole WHERE user_email = @UserEmail";
+                }
+
                 using (SqlConnection connection = new SqlConnection(cs))
                 {
                     connection.Open();
-
-                    string sqlQuery = "UPDATE dbo.Users SET user_name = @NewUserName, user_surname = @NewUserSurname, user_birth_date = @newUserBD, user_profile_img = @NewUserPI, role_description = @newUserRole WHERE user_email = @UserEmail";
 
                     SqlCommand cmd = new SqlCommand(sqlQuery, connection);
                     cmd.Parameters.AddWithValue("@NewUserName", model.UserName);
                     cmd.Parameters.AddWithValue("@NewUserSurname", model.UserSurname);
                     cmd.Parameters.AddWithValue("@NewUserBD", model.UserBirthDate);
-                    cmd.Parameters.AddWithValue("@NewUserPI", model.UserProfileImg);
-                    cmd.Parameters.AddWithValue("@NewUserRole", model.RoleDescription);
+                    cmd.Parameters.AddWithValue("@NewUserRole", model.SelectedRole);
                     cmd.Parameters.AddWithValue("@UserEmail", userEmail);
+
+                    // Agrega el parámetro para la imagen de perfil solo si hay una nueva imagen de perfil
+                    if (model.NewProfileImage != null)
+                    {
+                        using (var memoryStream = new MemoryStream())
+                        {
+                            await model.NewProfileImage.CopyToAsync(memoryStream);
+                            model.UserProfileImg = memoryStream.ToArray();
+                        }
+                        cmd.Parameters.AddWithValue("@NewUserPI", model.UserProfileImg);
+                    }
 
                     cmd.ExecuteNonQuery();
 
@@ -125,21 +180,25 @@ namespace PortalEmpleo.Controllers
                     ageUpdateCmd.ExecuteNonQuery();
                 }
 
-
                 return RedirectToAction("Index");
             }
             catch (SqlException ex)
             {
                 Console.WriteLine($"Error de base de datos al actualizar el perfil del usuario: {ex.Message}");
                 ModelState.AddModelError("", "Ocurrió un error al actualizar el perfil del usuario. Por favor, inténtelo de nuevo.");
+                model.Roles = ObtenerRoles();
+
                 return View(model);
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error al actualizar el perfil del usuario: {ex.Message}");
                 ModelState.AddModelError("", "Ocurrió un error al actualizar el perfil del usuario. Por favor, inténtelo de nuevo.");
+                model.Roles = ObtenerRoles();
+
                 return View(model);
             }
         }
+
     }
 }

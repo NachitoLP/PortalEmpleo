@@ -13,5 +13,7 @@ namespace PortalEmpleo.Models
 
         //[Display(Name = "Seleccionar nueva imagen de perfil")]
         public IFormFile NewProfileImage { get; set; }
+        public List<string> Roles { get; set; }
+        public string SelectedRole { get; set; }
     }
 }
