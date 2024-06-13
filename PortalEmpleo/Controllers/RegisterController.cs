@@ -21,30 +21,12 @@ namespace PortalEmpleo.Controllers
 			connectionString.IntegratedSecurity = true;
 
 			var cs = connectionString.ConnectionString;
-			List<Role> roles = new List<Role>();
 
-			using (SqlConnection connection = new SqlConnection(cs))
-			{
-				connection.Open();
+			var viewModel = new RegisterViewModel();
 
-				SqlCommand cmd = connection.CreateCommand();
-				cmd.CommandText = $"SELECT * FROM dbo.Role";
+			viewModel.Roles = UserUtils2.BringRoles();
 
-				var reader = cmd.ExecuteReader();
-				if (reader.HasRows)
-				{
-					while (reader.Read())
-					{
-						Role role = new Role
-						{
-							RoleDescription = (string)reader["role_description"]
-						};
-						roles.Add(role);
-					}
-					reader.Close();
-				}
-			}
-			return View(roles);
+			return View(viewModel);
 		}
 
 		[HttpPost]
@@ -74,16 +56,33 @@ namespace PortalEmpleo.Controllers
 				return BadRequest("El email ya está registrado en la base de datos.");
 			}
 
+			var password = formData["user_password"];
 
-			var user = new User
+            var hashedPassword = PasswordHasher.HashPassword(password);
+            var parts = hashedPassword.Split(':');
+            var passwordHash = parts[1];
+            var passwordSalt = parts[0];
+
+            var user = new User
 			{
 				UserName = formData["user_name"],
 				UserSurname = formData["user_surname"],
 				UserEmail = formData["user_email"],
-				UserPassword = formData["user_password"],
+				UserPassword = passwordHash,
+				UserPasswordSalt = passwordSalt,
 				UserBirthDate = DateTime.Parse(formData["user_birth_date"]),
 				RoleDescription = selectedRole
 			};
+
+			if (user.UserBirthDate > DateTime.Now)
+			{
+				var viewModel = new RegisterViewModel();
+
+				viewModel.Roles = UserUtils2.BringRoles();
+				viewModel.FutureDateError = "La fecha de nacimiento no puede ser posterior a la fecha actual.";
+
+				return View(viewModel);
+			}
 
 			user.UserAge = UserUtils.CalculateAge(user.UserBirthDate);
 
@@ -91,7 +90,7 @@ namespace PortalEmpleo.Controllers
 			{
 				connection.Open();
 
-				SqlCommand cmd = new SqlCommand("INSERT INTO dbo.Users(user_name, user_surname, user_email, user_password, user_birth_date, role_description, user_age) VALUES(@UserName, @UserSurname, @UserEmail, @UserPassword, @UserBirthDate, @RoleDescription, @UserAge)", connection);
+				SqlCommand cmd = new SqlCommand("INSERT INTO dbo.Users(user_name, user_surname, user_email, user_password, user_birth_date, role_description, user_age, user_password_salt) VALUES(@UserName, @UserSurname, @UserEmail, @UserPassword, @UserBirthDate, @RoleDescription, @UserAge, @UserPasswordSalt)", connection);
 				cmd.Parameters.AddWithValue("@UserName", user.UserName);
 				cmd.Parameters.AddWithValue("@UserSurname", user.UserSurname);
 				cmd.Parameters.AddWithValue("@UserEmail", user.UserEmail);
@@ -99,7 +98,8 @@ namespace PortalEmpleo.Controllers
 				cmd.Parameters.AddWithValue("@UserBirthDate", user.UserBirthDate);
 				cmd.Parameters.AddWithValue("@RoleDescription", user.RoleDescription);
 				cmd.Parameters.AddWithValue("@UserAge", user.UserAge);
-				cmd.ExecuteNonQuery();
+                cmd.Parameters.AddWithValue("@UserPasswordSalt", user.UserPasswordSalt);
+                cmd.ExecuteNonQuery();
 
 				connection.Close();
 			}

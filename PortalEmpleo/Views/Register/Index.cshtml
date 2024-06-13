@@ -2,10 +2,15 @@
 	ViewData["Title"] = "Register";
 }
 
+
 <div class="container">
 	<div class="screen_rg">
 		<div class="screen__content_rg">
 			<form class="login_rg" method="post">
+			@if (!string.IsNullOrEmpty(Model.FutureDateError))
+			{
+				<div class="alert alert-danger">@Model.FutureDateError</div>
+			}
 				<div class="login__field">
 					<i class="login__icon fas fa-user"></i>
 					<input type="text" class="login__input" placeholder="Nombre..." name="user_name">
@@ -35,14 +40,14 @@
 					}
 				</select> *@
 				<p style="font-weight:700; text-align:center;margin-top:10px;">¿Eres una empresa, o estás en búsqueda de empleo?</p>
-				@foreach (var role in Model)
+				@foreach (var role in Model.Roles)
 				{
 					<button class="button login__submit" type="submit" name="selectedRole" value="@role.RoleDescription">@role.RoleDescription</button>
 				}
+				<div class="lg_no_account">
+					<p>Do you have an account already? <a asp-controller="Login" asp-action="Index">Log In instead</a></p>
+				</div>
 			</form>
-			<div class="lg_no_account">
-				<p>Do you have an account already? <a asp-controller="Login" asp-action="Index">Log In instead</a></p>
-			</div>
 		</div>
 		<div class="screen__background">
 			<span class="screen__background__shape screen__background__shape4"></span>

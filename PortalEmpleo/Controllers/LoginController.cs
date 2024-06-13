@@ -17,58 +17,56 @@ namespace PortalEmpleo.Controllers
 		{
 			return View();
 		}
-		[HttpPost]
-		public async Task<IActionResult> Index(string user_email, string user_password)
-		{
-			var user = new User();
+        [HttpPost]
+        public async Task<IActionResult> Index(string user_email, string user_password)
+        {
+            SqlConnectionStringBuilder connectionString = new SqlConnectionStringBuilder();
+            connectionString.DataSource = cstring;
+            connectionString.InitialCatalog = csdb;
+            connectionString.IntegratedSecurity = true;
 
-			SqlConnectionStringBuilder connectionString = new();
-			connectionString.DataSource = cstring;
-			connectionString.InitialCatalog = csdb;
-			connectionString.IntegratedSecurity = true;
+            var cs = connectionString.ConnectionString;
 
-			var cs = connectionString.ConnectionString;
+            using (SqlConnection connection = new SqlConnection(cs))
+            {
+                connection.Open();
 
-			using (SqlConnection connection = new SqlConnection(cs))
-			{
-				connection.Open();
+                SqlCommand cmd = connection.CreateCommand();
+                cmd.CommandText = "SELECT user_password, user_password_salt, user_name, user_email, role_description FROM dbo.Users WHERE user_email = @user_email";
+                cmd.Parameters.AddWithValue("@user_email", user_email);
 
-				SqlCommand cmd = connection.CreateCommand();
-				cmd.CommandText = "LoginUser";
-				cmd.CommandType = CommandType.StoredProcedure;
-				cmd.Parameters.AddWithValue("@user_email", user_email);
-				cmd.Parameters.AddWithValue("@user_password", user_password);
-
-				var reader = cmd.ExecuteReader();
-				if (reader.HasRows)
-				{
-					while (reader.Read())
-					{
-						user.UserName = (string)reader["user_name"];
-						user.UserEmail = (string)reader["user_email"];
-						user.RoleDescription = (string)reader["role_description"];
-					}
-					reader.Close();
-
-                    var claims = new List<Claim>
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+                    if (reader.Read())
                     {
-                        new Claim(ClaimTypes.Name, user.UserName),
-                        new Claim("Correo", user.UserEmail),
-                        new Claim(ClaimTypes.Role, user.RoleDescription)
-                    };
+                        string hashedPasswordFromDb = reader.GetString(reader.GetOrdinal("user_password"));
+                        string saltFromDb = reader.GetString(reader.GetOrdinal("user_password_salt"));
+                        string user_name = reader.GetString(reader.GetOrdinal("user_name"));
+                        string roleDescription = reader.GetString(reader.GetOrdinal("role_description"));
 
-                    var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                        // Verificar si la contraseña proporcionada coincide con el hash almacenado
+                        if (PasswordHasher.VerifyPassword(user_password, $"{saltFromDb}:{hashedPasswordFromDb}"))
+                        {
+                            var claims = new List<Claim>
+                            {
+                                new Claim(ClaimTypes.Name, user_name),
+                                new Claim("Correo", user_email),
+                                new Claim(ClaimTypes.Role, roleDescription)
+                            };
 
-                    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
+                            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 
-                    return RedirectToAction("Index", "Home");
+                            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
+
+                            return RedirectToAction("Index", "Home");
+                        }
+                    }
                 }
-				else
-				{
-                    string jsonResponse = "{\"status\": 500, \"data\": \"ERROR, el usuario no existe en la BD\"}";
-                    return Json(jsonResponse);
-                }
-			}
-		}
-	}
+
+                string jsonResponse = "{\"status\": 500, \"data\": \"ERROR, el usuario no existe en la BD o la contraseña es incorrecta\"}";
+                return Json(jsonResponse);
+            }
+        }
+
+    }
 }

@@ -9,7 +9,8 @@ namespace PortalEmpleo.Models
 		public string UserSurname { get; set; }
 		public string UserEmail { get; set; }
 		public string UserPassword { get; set; }
-		public DateTime UserBirthDate { get; set; }
+        public string UserPasswordSalt { get; set; }
+        public DateTime UserBirthDate { get; set; }
 		public byte[] UserProfileImg { get; set; }
 		public int UserAge { get; set; }
         public string RoleDescription { get; set; }

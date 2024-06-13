@@ -1,7 +1,4 @@
-﻿@{
-    ViewData["Title"] = "Profile";
-}
-@model UserProfileViewModel
+﻿@model UserProfileViewModel
 
 <h2>Mi Perfil</h2>
 
@@ -25,47 +22,22 @@
             }
         </div>
     </div>
+    @if (!string.IsNullOrEmpty(Model.FutureDateError))
+    {
+        <div style="width:80%;margin:auto;text-align:center;margin-bottom:20px;" class="alert alert-danger">@Model.FutureDateError</div>
+    }
     <div class="div_form_inputs">
-        <div class="form-group">
-            <label asp-for="NewProfileImage">Seleccionar nueva imagen de perfil:</label>
-            <input type="file" asp-for="NewProfileImage" class="form-control" />
-        </div>
+        <!-- Eliminamos los inputs y los reemplazamos por elementos <p> -->
+        <p><strong>Nombre:</strong> @Model.UserName</p>
 
-        <div class="form-group">
-            <label asp-for="UserName">Nombre:</label>
-            <input asp-for="UserName" class="form-control" />
-            <span asp-validation-for="UserName" class="text-danger"></span>
-        </div>
+        <p><strong>Apellido:</strong> @Model.UserSurname</p>
 
-        <div class="form-group">
-            <label asp-for="UserSurname">Apellido:</label>
-            <input asp-for="UserSurname" class="form-control" />
-            <span asp-validation-for="UserSurname" class="text-danger"></span>
-        </div>
+        <p><strong>Fecha de Nacimiento:</strong> @Model.UserBirthDate</p>
 
-        <div class="form-group">
-            <label asp-for="UserBirthDate">Fecha de Nacimiento:</label>
-            <input asp-for="UserBirthDate" class="form-control" />
-            <span asp-validation-for="UserBirthDate" class="text-danger"></span>
-        </div>
+        <p><strong>Rol:</strong> @Model.RoleDescription</p>
 
-        <div class="form-group">
-            <label for="role">Rol:</label>
-            <select id="role" name="SelectedRole" class="form-control">
-                @foreach (var role in Model.Roles)
-                {
-                    @if(role == Model.RoleDescription)
-                    {
-                        <option value="@role" selected>@role</option>
-                    }
-                    else
-                    {
-                        <option value="@role">@role</option>
-                    }
-                }
-            </select>
-        </div>
-        <br/>
-        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+        <br />
+        <!-- Eliminamos el botón de "Guardar Cambios" ya que no hay datos para modificar -->
     </div>
+    <a asp-controller="Profile" asp-action="ModifyProfile" class="btn btn-primary" style="margin:auto;display:block;width:150px;">Modificar</a>
 </form>

@@ -1,0 +1,77 @@
+﻿@{
+    ViewData["Title"] = "Profile";
+}
+@model UserProfileViewModel
+
+<h2>Mi Perfil</h2>
+
+@if (ViewData.ModelState.ContainsKey(""))
+{
+    <div class="alert alert-danger" role="alert">
+        @Html.ValidationSummary(false, null, new { @class = "text-danger" })
+    </div>
+}
+
+<form asp-action="Index" method="post" enctype="multipart/form-data" class="form_mod_perfil">
+    <div class="form-group div_perfil">
+        <div class="div_img_perfi">
+            @if (Model.UserProfileImg != null)
+            {
+                <img src="data:image;base64,@Convert.ToBase64String(Model.UserProfileImg)" class="img_perfil" />
+            }
+            else
+            {
+                <img src="Images/perfil_df.jpg" class="img_perfil" />
+            }
+        </div>
+    </div>
+    @if (!string.IsNullOrEmpty(Model.FutureDateError))
+    {
+        <div style="width:80%;margin:auto;text-align:center;margin-bottom:20px;" class="alert alert-danger">@Model.FutureDateError</div>
+    }
+    <div class="div_form_inputs">
+        <div class="form-group">
+            <label asp-for="NewProfileImage">Seleccionar nueva imagen de perfil:</label>
+            <input type="file" asp-for="NewProfileImage" class="form-control" />
+        </div>
+
+        <div class="form-group">
+            <label asp-for="UserName">Nombre:</label>
+            <input asp-for="UserName" class="form-control" />
+            <span asp-validation-for="UserName" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="UserSurname">Apellido:</label>
+            <input asp-for="UserSurname" class="form-control" />
+            <span asp-validation-for="UserSurname" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="UserBirthDate">Fecha de Nacimiento:</label>
+            <input asp-for="UserBirthDate" class="form-control" />
+            <span asp-validation-for="UserBirthDate" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label for="role">Rol:</label>
+            <select id="role" name="SelectedRole" class="form-control">
+                @foreach (var role in Model.Roles)
+                {
+                    @if (role.RoleDescription == Model.RoleDescription)
+                    {
+                        <option value="@role.RoleDescription" selected>@role.RoleDescription</option>
+                    }
+                    else
+                    {
+                        <option value="@role.RoleDescription">@role.RoleDescription</option>
+                    }
+                }
+            </select>
+        </div>
+        <br />
+        <div style="display:flex;flex-grow:1;flex-wrap:wrap;justify-content:center;">
+            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+            <a asp-controller="Profile" asp-action="Index" class="btn btn-primary" style="margin-left:20px;width:150px;background-color:red;">Cancelar</a>
+        </div>
+    </div>
+</form>

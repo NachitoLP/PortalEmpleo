@@ -1,4 +1,7 @@
-﻿namespace PortalEmpleo.Utils
+﻿using PortalEmpleo.Models;
+using System.Data.SqlClient;
+
+namespace PortalEmpleo.Utils
 {
     public static class UserUtils
     {
@@ -15,12 +18,99 @@
 
     public static class UserUtils2
     {
-        public static byte[] ObtenerBytesImagenDefault()
+		private static string cstring = "FX-NB-001\\MSSQLSERVER02";
+		private static string csdb = "PortalEmpleo";
+
+		public static User getUser(string userEmail)
+		{
+            SqlConnectionStringBuilder connectionString = new SqlConnectionStringBuilder();
+            connectionString.DataSource = cstring;
+            connectionString.InitialCatalog = csdb;
+            connectionString.IntegratedSecurity = true;
+
+            var cs = connectionString.ConnectionString;
+
+            var user = new User();
+
+            using (SqlConnection connection = new SqlConnection(cs))
+            {
+                connection.Open();
+
+                string sqlQuery = "SELECT * FROM dbo.Users WHERE user_email = @UserEmail";
+
+                SqlCommand cmd = new SqlCommand(sqlQuery, connection);
+                cmd.Parameters.AddWithValue("@UserEmail", userEmail);
+
+                var reader = cmd.ExecuteReader();
+
+                if (reader.Read())
+                {
+                    user = new User
+                    {
+                        UserName = (string)reader["user_name"],
+                        UserSurname = (string)reader["user_surname"],
+                        UserEmail = (string)reader["user_email"],
+                        UserBirthDate = (DateTime)reader["user_birth_date"],
+                        RoleDescription = (string)reader["role_description"]
+
+                    };
+                    if (reader["user_profile_img"] == DBNull.Value)
+                    {
+                        // Asigna una imagen predeterminada
+                        byte[] imagenDefaultBytes = UserUtils2.ObtenerBytesImagenDefault();
+                        user.UserProfileImg = imagenDefaultBytes; // Debes definir esta función
+                    }
+                    else
+                    {
+                        // Convierte la imagen de la base de datos a un arreglo de bytes
+                        user.UserProfileImg = (byte[])reader["user_profile_img"];
+                    }
+                }
+                reader.Close();
+            }
+            return user;
+        }
+		public static byte[] ObtenerBytesImagenDefault()
         {
             string rutaImagenDefault = "wwwroot/Images/perfil_df.jpg"; // Ruta local en tu sistema de archivos
             byte[] bytesImagenDefault = File.ReadAllBytes(rutaImagenDefault);
 
             return bytesImagenDefault;
         }
-    }
+
+		public static List<Role> BringRoles()
+		{
+			SqlConnectionStringBuilder connectionString = new SqlConnectionStringBuilder();
+			connectionString.DataSource = cstring;
+			connectionString.InitialCatalog = csdb;
+			connectionString.IntegratedSecurity = true;
+
+			var cs = connectionString.ConnectionString;
+
+			List<Role> roles = new List<Role>();
+
+			using (SqlConnection connection = new SqlConnection(cs))
+			{
+				connection.Open();
+
+				string sqlQuery = "SELECT * FROM dbo.Role";
+
+				SqlCommand cmd = new SqlCommand(sqlQuery, connection);
+				var reader = cmd.ExecuteReader();
+
+				while (reader.Read())
+				{
+					Role role = new Role
+					{
+						RoleDescription = (string)reader["role_description"]
+					};
+					roles.Add(role);
+				}
+
+				reader.Close();
+			}
+
+			return roles;
+		}
+	}
 }
