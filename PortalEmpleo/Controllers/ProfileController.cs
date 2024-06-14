@@ -83,7 +83,7 @@ namespace PortalEmpleo.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Index(UserProfileViewModel model)
+        public async Task<IActionResult> ModifyProfile(UserProfileViewModel model)
         {
             SqlConnectionStringBuilder connectionString = new SqlConnectionStringBuilder();
             connectionString.DataSource = cstring;
