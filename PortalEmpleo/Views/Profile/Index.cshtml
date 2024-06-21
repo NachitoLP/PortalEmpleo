@@ -1,6 +1,60 @@
 ﻿@model UserProfileViewModel
 
-<h2>Mi Perfil</h2>
+<header class="container-fluid header">
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+        <div class="container-fluid">
+            <h3 class="navbar-brand">LinkedOut</h3>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" asp-area="" asp-controller="Employments" asp-action="Index">Employments</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                    </li>
+                </ul>
+                @* <form class="d-flex" asp-controller="Employments" role="search" asp-action="Index">
+                <input class="form-control me-2" placeholder="Buscar..." aria-label="search" name="search">
+                <button class="btn btn-outline-success" style="color:white; border:none;" type="submit"><span class="material-symbols-outlined">search</span></button>
+                </form> *@
+
+                <div class="icons_header_login">
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <a asp-controller="Profile" asp-action="Index">
+                            <div class="nav_login">
+                                <span class="material-symbols-outlined">person</span>
+                                <label>Mi Perfil</label>
+                            </div>
+                        </a>
+                        <a asp-controller="Logout" asp-action="Index">
+                            <div class="nav_login">
+                                <span class="material-symbols-outlined">logout</span>
+                                <label>Salir</label>
+                            </div>
+                        </a>
+                    }
+                    else
+                    {
+                        <a asp-controller="Login" asp-action="Index">
+                            <div class="nav_login">
+                                <span class="material-symbols-outlined">person</span>
+                                <label>Ingresar</label>
+                            </div>
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+    </nav>
+</header>
+
 
 @if (ViewData.ModelState.ContainsKey(""))
 {
@@ -9,35 +63,69 @@
     </div>
 }
 
-<form asp-action="Index" method="post" enctype="multipart/form-data" class="form_mod_perfil">
-    <div class="form-group div_perfil">
-        <div class="div_img_perfi">
+<div class="profile_container">
+    <div class="profile-header">
+        <div class="profile-img">
             @if (Model.UserProfileImg != null)
             {
-                <img src="data:image;base64,@Convert.ToBase64String(Model.UserProfileImg)" class="img_perfil" />
+                <img src="data:image;base64,@Convert.ToBase64String(Model.UserProfileImg)" class="img-profile" />
             }
             else
             {
-                <img src="Images/perfil_df.jpg" class="img_perfil" />
+                <img src="Images/perfil_df.jpg" class="img-profile" />
             }
         </div>
+        <div class="profile-details">
+            <h2>@Model.UserName @Model.UserSurname</h2>
+            <p class="profile-title">@Model.UserTitle</p>
+            <p class="profile-info"><strong>Fecha de Nacimiento:</strong> @Model.UserBirthDate.ToString("dd/MM/yyyy")</p>
+            <p class="profile-info"><strong>Rol:</strong> @Model.RoleDescription</p>
+        </div>
     </div>
+
     @if (!string.IsNullOrEmpty(Model.FutureDateError))
     {
-        <div style="width:80%;margin:auto;text-align:center;margin-bottom:20px;" class="alert alert-danger">@Model.FutureDateError</div>
+        <div class="alert alert-danger">@Model.FutureDateError</div>
     }
-    <div class="div_form_inputs">
-        <!-- Eliminamos los inputs y los reemplazamos por elementos <p> -->
-        <p><strong>Nombre:</strong> @Model.UserName</p>
 
-        <p><strong>Apellido:</strong> @Model.UserSurname</p>
+    <a asp-controller="Profile" asp-action="ModifyProfile" class="btn btn-primary">Modificar Perfil</a>
+</div>
 
-        <p><strong>Fecha de Nacimiento:</strong> @Model.UserBirthDate</p>
+<br />
+<h4 style="text-align:center;">Tus Posts:</h4>
 
-        <p><strong>Rol:</strong> @Model.RoleDescription</p>
+<div class="div_all_posts">
+    @foreach (var post in Model.Posts)
+    {
+        <div class="div_post">
+            <div class="div_post_profile">
+                @if (Model.UserProfileImg != null)
+                {
+                    <img src="data:image;base64,@Convert.ToBase64String(Model.UserProfileImg)" class="post_profile_image" />
+                }
+                else
+                {
+                    <img src="Images/perfil_df.jpg" class="post_profile_image" />
+                }
+                <div style="display:flex;flex-direction:column;">
+                    <p style="margin-bottom: 0px;"><strong>@Model.UserName</strong></p>
+                    <p style="font-size:14px">@Model.UserTitle</p>
+                </div>
+            </div>
+            <div class="div_post_info">
+                <p style="font-size:12px;">@post.PostDate</p>
+                <h3>@post.PostTitle</h3>
+                <p>@post.PostDescription</p>
+                @if (post.PostImage != null)
+                {
+                    <img src="@post.PostImage" alt="Imagen del post" style="max-width: 100px; max-height: 100px;" />
+                }
+                else
+                {
+                    <img src="Images/techpro.jpg" />
+                }
+            </div>
+        </div>
+    }
+</div>
 
-        <br />
-        <!-- Eliminamos el botón de "Guardar Cambios" ya que no hay datos para modificar -->
-    </div>
-    <a asp-controller="Profile" asp-action="ModifyProfile" class="btn btn-primary" style="margin:auto;display:block;width:150px;">Modificar</a>
-</form>

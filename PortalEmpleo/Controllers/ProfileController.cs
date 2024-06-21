@@ -16,15 +16,13 @@ namespace PortalEmpleo.Controllers
 	[Authorize]
 	public class ProfileController : Controller
 	{
-		private string cstring = "FX-NB-001\\MSSQLSERVER02";
-		private string csdb = "PortalEmpleo";
-
         public IActionResult Index()
 		{
 			var userEmail = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "Correo")?.Value;
 
             var user = UserUtils2.getUser(userEmail);
 
+            var userId = user.UserId;
 
 			try
 			{
@@ -35,11 +33,15 @@ namespace PortalEmpleo.Controllers
                     UserEmail = user.UserEmail,
                     UserBirthDate = user.UserBirthDate,
                     UserProfileImg = user.UserProfileImg,
+                    UserTitle = user.UserTitle,
                     RoleDescription = user.RoleDescription
                 };
 
+                List<Post> userPosts = PostUtils.GetPostsByUser(userId);
                 List<Role> userRoles = UserUtils2.BringRoles();
+
                 viewModel.Roles = userRoles;
+                viewModel.Posts = userPosts;
 
                 return View(viewModel);
                 
@@ -65,6 +67,7 @@ namespace PortalEmpleo.Controllers
                     UserEmail = user.UserEmail,
                     UserBirthDate = user.UserBirthDate,
                     UserProfileImg = user.UserProfileImg,
+                    UserTitle = user.UserTitle,
                     RoleDescription = user.RoleDescription
                 };
 
@@ -86,11 +89,8 @@ namespace PortalEmpleo.Controllers
         public async Task<IActionResult> ModifyProfile(UserProfileViewModel model)
         {
             SqlConnectionStringBuilder connectionString = new SqlConnectionStringBuilder();
-            connectionString.DataSource = cstring;
-            connectionString.InitialCatalog = csdb;
-            connectionString.IntegratedSecurity = true;
 
-            var cs = connectionString.ConnectionString;
+            var cs = DBHelper.GetConnectionString();
             try
             {
                 var userEmail = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "Correo")?.Value;
@@ -101,12 +101,12 @@ namespace PortalEmpleo.Controllers
                 if (model.NewProfileImage != null)
                 {
                     // Si hay una nueva imagen de perfil, actualiza la consulta SQL para incluir la imagen de perfil
-                    sqlQuery = "UPDATE dbo.Users SET user_name = @NewUserName, user_surname = @NewUserSurname, user_birth_date = @NewUserBD, user_profile_img = @NewUserPI, role_description = @NewUserRole WHERE user_email = @UserEmail";
+                    sqlQuery = "UPDATE dbo.Users SET user_name = @NewUserName, user_surname = @NewUserSurname, user_birth_date = @NewUserBD, user_profile_img = @NewUserPI, role_description = @NewUserRole, user_title_description = @UserTitle WHERE user_email = @UserEmail";
                 }
                 else
                 {
                     // Si no hay una nueva imagen de perfil, actualiza la consulta SQL para omitir la imagen de perfil
-                    sqlQuery = "UPDATE dbo.Users SET user_name = @NewUserName, user_surname = @NewUserSurname, user_birth_date = @NewUserBD, role_description = @NewUserRole WHERE user_email = @UserEmail";
+                    sqlQuery = "UPDATE dbo.Users SET user_name = @NewUserName, user_surname = @NewUserSurname, user_birth_date = @NewUserBD, role_description = @NewUserRole, user_title_description = @UserTitle WHERE user_email = @UserEmail";
                 }
 
                 if (model.UserBirthDate > DateTime.Now)
@@ -119,6 +119,7 @@ namespace PortalEmpleo.Controllers
                         UserEmail = user.UserEmail,
                         UserBirthDate = user.UserBirthDate,
                         UserProfileImg = user.UserProfileImg,
+                        UserTitle = user.UserTitle,
                         RoleDescription = user.RoleDescription
                     };
 
@@ -138,6 +139,7 @@ namespace PortalEmpleo.Controllers
                     cmd.Parameters.AddWithValue("@NewUserSurname", model.UserSurname);
                     cmd.Parameters.AddWithValue("@NewUserBD", model.UserBirthDate);
                     cmd.Parameters.AddWithValue("@NewUserRole", model.SelectedRole);
+                    cmd.Parameters.AddWithValue("@UserTitle", model.UserTitle);
                     cmd.Parameters.AddWithValue("@UserEmail", userEmail);
 
                     // Agrega el parámetro para la imagen de perfil solo si hay una nueva imagen de perfil

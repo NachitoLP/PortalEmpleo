@@ -3,6 +3,7 @@ using PortalEmpleo.Models;
 using System.Diagnostics;
 
 using Microsoft.AspNetCore.Authorization;
+using PortalEmpleo.Utils;
 
 namespace PortalEmpleo.Controllers
 {
@@ -18,7 +19,8 @@ namespace PortalEmpleo.Controllers
 
         public IActionResult Index()
         {
-            return View();
+            var posts = PostUtils.GetPosts();
+            return View(posts);
         }
 
         public IActionResult Privacy()

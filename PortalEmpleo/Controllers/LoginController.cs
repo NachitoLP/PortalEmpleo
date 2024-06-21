@@ -5,14 +5,12 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication;
 using System.Security.Claims;
 using System.Data;
+using PortalEmpleo.Utils;
 
 namespace PortalEmpleo.Controllers
 {
 	public class LoginController : Controller
 	{
-		private string cstring = "FX-NB-001\\MSSQLSERVER02";
-		private string csdb = "PortalEmpleo";
-
 		public IActionResult Index()
 		{
 			return View();
@@ -21,11 +19,8 @@ namespace PortalEmpleo.Controllers
         public async Task<IActionResult> Index(string user_email, string user_password)
         {
             SqlConnectionStringBuilder connectionString = new SqlConnectionStringBuilder();
-            connectionString.DataSource = cstring;
-            connectionString.InitialCatalog = csdb;
-            connectionString.IntegratedSecurity = true;
 
-            var cs = connectionString.ConnectionString;
+            var cs = DBHelper.GetConnectionString();
 
             using (SqlConnection connection = new SqlConnection(cs))
             {

@@ -3,7 +3,6 @@
 }
 @model UserProfileViewModel
 
-<h2>Mi Perfil</h2>
 
 @if (ViewData.ModelState.ContainsKey(""))
 {
@@ -46,6 +45,13 @@
             <input asp-for="UserSurname" class="form-control" />
             <span asp-validation-for="UserSurname" class="text-danger"></span>
         </div>
+
+        <div class="form-group">
+            <label asp-for="UserTitle">Título:</label>
+            <input asp-for="UserTitle" class="form-control" />
+            <span asp-validation-for="UserTitle" class="text-danger"></span>
+        </div>
+
         <div class="form-group">
             <label asp-for="UserBirthDate">Fecha de Nacimiento:</label>
             <input asp-for="UserBirthDate" class="form-control" />
@@ -69,9 +75,9 @@
             </select>
         </div>
         <br />
-        <div style="display:flex;flex-grow:1;flex-wrap:wrap;justify-content:center;">
-            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-            <a asp-controller="Profile" asp-action="Index" class="btn btn-primary" style="margin-left:20px;width:150px;background-color:red;">Cancelar</a>
+        <div style="display:flex;flex-direction:column; align-items:center;">
+            <div class="modify_button_div"><button type="submit" class="btn btn-primary">Guardar Cambios</button></div>
+            <div class="modify_button_div"><a asp-controller="Profile" asp-action="Index" class="btn_cancel_modify btn btn-secondary">Cancelar</a></div>
         </div>
     </div>
 </form>

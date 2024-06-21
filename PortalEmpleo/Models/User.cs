@@ -13,9 +13,10 @@ namespace PortalEmpleo.Models
         public DateTime UserBirthDate { get; set; }
 		public byte[] UserProfileImg { get; set; }
 		public int UserAge { get; set; }
+		public string UserTitle { get; set; }
         public string RoleDescription { get; set; }
         public Role Role { get; set; }
-
+        public List<Post> Posts { get; set; }
         public List<Skill> Skills { get; set; }
 
         public List<Company> Companies { get; set; }
@@ -23,8 +24,10 @@ namespace PortalEmpleo.Models
         public User()
 		{
             UserAge = CalculateAge(UserBirthDate);
-		}
-
+            Posts = new List<Post>();
+            Skills = new List<Skill>();
+            Companies = new List<Company>();
+        }
         public void AddCompany(Company company)
         {
             Companies.Add(company);

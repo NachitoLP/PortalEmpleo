@@ -57,4 +57,39 @@
     </nav>
 </header>
 
-<h2>Welcome</h2>
+@model List<Post>
+
+<div class="div_all_posts">
+    @foreach (var post in Model)
+    {
+        <div class="div_post">
+            <div class="div_post_profile">
+                @if (post.UserProfileImg != null)
+                {
+                    <img src="data:image;base64,@Convert.ToBase64String(post.UserProfileImg)" class="post_profile_image" />
+                }
+                else
+                {
+                    <img src="Images/perfil_df.jpg" class="post_profile_image" />
+                }
+                <div style="display:flex;flex-direction:column;">
+                    <p style="margin-bottom: 0px;"><strong>@post.UserName</strong></p>
+                    <p style="font-size:14px; margin-bottom: 0px;">@post.UserTitle</p>
+                </div>
+            </div>
+            <div class="div_post_info">
+                <p style="font-size:12px;">@post.PostDate</p>
+                <h3>@post.PostTitle</h3>
+                <p>@post.PostDescription</p>
+                @if (post.PostImage != null)
+                {
+                    <img src="@post.PostImage" alt="Imagen del post" style="max-width: 100px; max-height: 100px;" />
+                }
+                else
+                {
+                    <img src="Images/techpro.jpg"/>
+                }
+            </div>
+        </div>
+    }
+</div>

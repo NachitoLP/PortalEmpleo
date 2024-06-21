@@ -1,4 +1,5 @@
 ﻿using PortalEmpleo.Models;
+using System.Data;
 using System.Data.SqlClient;
 
 namespace PortalEmpleo.Utils
@@ -18,17 +19,11 @@ namespace PortalEmpleo.Utils
 
     public static class UserUtils2
     {
-		private static string cstring = "FX-NB-001\\MSSQLSERVER02";
-		private static string csdb = "PortalEmpleo";
-
 		public static User getUser(string userEmail)
 		{
             SqlConnectionStringBuilder connectionString = new SqlConnectionStringBuilder();
-            connectionString.DataSource = cstring;
-            connectionString.InitialCatalog = csdb;
-            connectionString.IntegratedSecurity = true;
 
-            var cs = connectionString.ConnectionString;
+            var cs = DBHelper.GetConnectionString();
 
             var user = new User();
 
@@ -47,10 +42,12 @@ namespace PortalEmpleo.Utils
                 {
                     user = new User
                     {
+                        UserId = (int)reader["user_id"],
                         UserName = (string)reader["user_name"],
                         UserSurname = (string)reader["user_surname"],
                         UserEmail = (string)reader["user_email"],
                         UserBirthDate = (DateTime)reader["user_birth_date"],
+                        UserTitle = (string)reader["user_title_description"],
                         RoleDescription = (string)reader["role_description"]
 
                     };
@@ -70,6 +67,7 @@ namespace PortalEmpleo.Utils
             }
             return user;
         }
+
 		public static byte[] ObtenerBytesImagenDefault()
         {
             string rutaImagenDefault = "wwwroot/Images/perfil_df.jpg"; // Ruta local en tu sistema de archivos
@@ -81,13 +79,10 @@ namespace PortalEmpleo.Utils
 		public static List<Role> BringRoles()
 		{
 			SqlConnectionStringBuilder connectionString = new SqlConnectionStringBuilder();
-			connectionString.DataSource = cstring;
-			connectionString.InitialCatalog = csdb;
-			connectionString.IntegratedSecurity = true;
 
-			var cs = connectionString.ConnectionString;
+            var cs = DBHelper.GetConnectionString();
 
-			List<Role> roles = new List<Role>();
+            List<Role> roles = new List<Role>();
 
 			using (SqlConnection connection = new SqlConnection(cs))
 			{

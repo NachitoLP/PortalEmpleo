@@ -11,18 +11,13 @@ namespace PortalEmpleo.Controllers
 {
 	public class RegisterController : Controller
 	{
-		private string cstring = "FX-NB-001\\MSSQLSERVER02";
-		private string csdb = "PortalEmpleo";
 		public IActionResult Index()
 		{
 			SqlConnectionStringBuilder connectionString = new();
-			connectionString.DataSource = cstring;
-			connectionString.InitialCatalog = csdb;
-			connectionString.IntegratedSecurity = true;
 
-			var cs = connectionString.ConnectionString;
+            var cs = DBHelper.GetConnectionString();
 
-			var viewModel = new RegisterViewModel();
+            var viewModel = new RegisterViewModel();
 
 			viewModel.Roles = UserUtils2.BringRoles();
 
@@ -33,13 +28,10 @@ namespace PortalEmpleo.Controllers
 		public async Task<IActionResult> Index(string selectedRole, IFormCollection formData)
 		{
 			SqlConnectionStringBuilder connectionString = new();
-			connectionString.DataSource = cstring;
-			connectionString.InitialCatalog = csdb;
-			connectionString.IntegratedSecurity = true;
 
-			var cs = connectionString.ConnectionString;
+            var cs = DBHelper.GetConnectionString();
 
-			bool emailExists;
+            bool emailExists;
 			var checkEmail = formData["user_email"].ToString();
 
 			using (SqlConnection connection = new SqlConnection(cs))
