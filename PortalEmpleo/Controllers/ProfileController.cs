@@ -1,15 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Data.SqlClient;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication;
-using System.Security.Claims;
+
 using PortalEmpleo.Models;
 using PortalEmpleo.Utils;
-using System.Data;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Microsoft.AspNetCore.Identity;
 
 namespace PortalEmpleo.Controllers
 {
@@ -34,6 +28,7 @@ namespace PortalEmpleo.Controllers
                     UserBirthDate = user.UserBirthDate,
                     UserProfileImg = user.UserProfileImg,
                     UserTitle = user.UserTitle,
+                    UserDescription = user.UserDescription,
                     RoleDescription = user.RoleDescription
                 };
 
@@ -68,6 +63,7 @@ namespace PortalEmpleo.Controllers
                     UserBirthDate = user.UserBirthDate,
                     UserProfileImg = user.UserProfileImg,
                     UserTitle = user.UserTitle,
+                    UserDescription = user.UserDescription,
                     RoleDescription = user.RoleDescription
                 };
 
@@ -86,10 +82,41 @@ namespace PortalEmpleo.Controllers
         }
 
         [HttpPost]
+        public IActionResult DeletePost(int id)
+        {
+            try
+            {
+                var cs = DBHelper.GetConnectionString();
+
+                using (SqlConnection connection = new SqlConnection(cs))
+                {
+                    connection.Open();
+
+                    string sqlQuery = "DELETE FROM dbo.Posts WHERE post_id = @PostId";
+
+                    SqlCommand cmd = new SqlCommand(sqlQuery, connection);
+                    cmd.Parameters.AddWithValue("@PostId", id);
+
+                    cmd.ExecuteNonQuery();
+
+                    int rowsAffected = cmd.ExecuteNonQuery();
+
+                    connection.Close();
+
+                    return Json(new { success = true });
+                }
+            }
+            catch (Exception ex)
+            {
+                // Manejar excepciones si es necesario
+                Console.WriteLine("Error al eliminar el post:", ex.Message);
+                return StatusCode(500); // Devolver un código de error HTTP 500 en caso de error
+            }
+        }
+
+        [HttpPost]
         public async Task<IActionResult> ModifyProfile(UserProfileViewModel model)
         {
-            SqlConnectionStringBuilder connectionString = new SqlConnectionStringBuilder();
-
             var cs = DBHelper.GetConnectionString();
             try
             {
@@ -101,12 +128,12 @@ namespace PortalEmpleo.Controllers
                 if (model.NewProfileImage != null)
                 {
                     // Si hay una nueva imagen de perfil, actualiza la consulta SQL para incluir la imagen de perfil
-                    sqlQuery = "UPDATE dbo.Users SET user_name = @NewUserName, user_surname = @NewUserSurname, user_birth_date = @NewUserBD, user_profile_img = @NewUserPI, role_description = @NewUserRole, user_title_description = @UserTitle WHERE user_email = @UserEmail";
+                    sqlQuery = "UPDATE dbo.Users SET user_name = @NewUserName, user_surname = @NewUserSurname, user_birth_date = @NewUserBD, user_profile_img = @NewUserPI, role_description = @NewUserRole, user_title_description = @UserTitle, user_about_me = @UserDescription WHERE user_email = @UserEmail";
                 }
                 else
                 {
                     // Si no hay una nueva imagen de perfil, actualiza la consulta SQL para omitir la imagen de perfil
-                    sqlQuery = "UPDATE dbo.Users SET user_name = @NewUserName, user_surname = @NewUserSurname, user_birth_date = @NewUserBD, role_description = @NewUserRole, user_title_description = @UserTitle WHERE user_email = @UserEmail";
+                    sqlQuery = "UPDATE dbo.Users SET user_name = @NewUserName, user_surname = @NewUserSurname, user_birth_date = @NewUserBD, role_description = @NewUserRole, user_title_description = @UserTitle, user_about_me = @UserDescription WHERE user_email = @UserEmail";
                 }
 
                 if (model.UserBirthDate > DateTime.Now)
@@ -120,6 +147,7 @@ namespace PortalEmpleo.Controllers
                         UserBirthDate = user.UserBirthDate,
                         UserProfileImg = user.UserProfileImg,
                         UserTitle = user.UserTitle,
+                        UserDescription = user.UserDescription,
                         RoleDescription = user.RoleDescription
                     };
 
@@ -139,8 +167,23 @@ namespace PortalEmpleo.Controllers
                     cmd.Parameters.AddWithValue("@NewUserSurname", model.UserSurname);
                     cmd.Parameters.AddWithValue("@NewUserBD", model.UserBirthDate);
                     cmd.Parameters.AddWithValue("@NewUserRole", model.SelectedRole);
-                    cmd.Parameters.AddWithValue("@UserTitle", model.UserTitle);
                     cmd.Parameters.AddWithValue("@UserEmail", userEmail);
+
+                    if (model.UserTitle == null) {
+                        cmd.Parameters.AddWithValue("@UserTitle", "");
+                    }
+                    else
+                    {
+                        cmd.Parameters.AddWithValue("@UserTitle", model.UserTitle);
+                    }
+
+                    if (model.UserDescription == null) {
+                        cmd.Parameters.AddWithValue("@UserDescription", "");
+                    }
+                    else
+                    {
+                        cmd.Parameters.AddWithValue("@UserDescription", model.UserDescription);
+                    }
 
                     // Agrega el parámetro para la imagen de perfil solo si hay una nueva imagen de perfil
                     if (model.NewProfileImage != null)

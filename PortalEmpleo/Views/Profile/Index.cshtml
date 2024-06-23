@@ -80,6 +80,7 @@
             <p class="profile-title">@Model.UserTitle</p>
             <p class="profile-info"><strong>Fecha de Nacimiento:</strong> @Model.UserBirthDate.ToString("dd/MM/yyyy")</p>
             <p class="profile-info"><strong>Rol:</strong> @Model.RoleDescription</p>
+            <p class="profile-info" style="word-wrap: break-word; max-width:800px; text-align:justify;"><strong>Sobre mí:</strong> @Model.UserDescription</p>
         </div>
     </div>
 
@@ -92,7 +93,7 @@
 </div>
 
 <br />
-<h4 style="text-align:center;">Tus Posts:</h4>
+<h4 style="text-align:center;">Tus publicaciones:</h4>
 
 <div class="div_all_posts">
     @foreach (var post in Model.Posts)
@@ -108,24 +109,68 @@
                     <img src="Images/perfil_df.jpg" class="post_profile_image" />
                 }
                 <div style="display:flex;flex-direction:column;">
-                    <p style="margin-bottom: 0px;"><strong>@Model.UserName</strong></p>
+                    <p style="margin-bottom: 0px;"><strong>@Model.UserName @Model.UserSurname</strong></p>
                     <p style="font-size:14px">@Model.UserTitle</p>
                 </div>
             </div>
             <div class="div_post_info">
                 <p style="font-size:12px;">@post.PostDate</p>
+                <div class="delete_icon">
+                    <span class="material-symbols-outlined text-danger" style="cursor: pointer;" onclick="confirmarEliminacion(@post.PostId)">delete</span>
+                </div>
                 <h3>@post.PostTitle</h3>
                 <p>@post.PostDescription</p>
                 @if (post.PostImage != null)
                 {
-                    <img src="@post.PostImage" alt="Imagen del post" style="max-width: 100px; max-height: 100px;" />
-                }
-                else
-                {
-                    <img src="Images/techpro.jpg" />
+                    <img src="data:image;base64,@Convert.ToBase64String(post.PostImage)" alt="Imagen del post" style="" />
                 }
             </div>
         </div>
     }
 </div>
 
+<script>
+    function confirmarEliminacion(postId) {
+        Swal.fire({
+            title: '¿Estás seguro?',
+            text: 'Esta acción eliminará permanentemente el post.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Sí, eliminarlo!',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '/Profile/DeletePost/' + postId,
+                    type: 'POST',
+                    data: { id: postId },
+                    success: function (response) {
+                        
+                        if (response.success) {
+                            
+                            Swal.fire({
+                                icon: 'success',
+                                title: '¡Eliminado!',
+                                text: 'El post ha sido eliminado correctamente.'
+                            }).then(() => {
+                                
+                                window.location.href = '/Profile';
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'Hubo un problema al intentar eliminar el post.'
+                            });
+                        }
+                    },
+                    error: function (error) {
+                        console.error('Error al intentar eliminar el post:', error);
+                    }
+                });
+            }
+        });
+    }
+</script>

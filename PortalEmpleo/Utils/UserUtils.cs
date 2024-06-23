@@ -21,7 +21,6 @@ namespace PortalEmpleo.Utils
     {
 		public static User getUser(string userEmail)
 		{
-            SqlConnectionStringBuilder connectionString = new SqlConnectionStringBuilder();
 
             var cs = DBHelper.GetConnectionString();
 
@@ -47,10 +46,20 @@ namespace PortalEmpleo.Utils
                         UserSurname = (string)reader["user_surname"],
                         UserEmail = (string)reader["user_email"],
                         UserBirthDate = (DateTime)reader["user_birth_date"],
-                        UserTitle = (string)reader["user_title_description"],
                         RoleDescription = (string)reader["role_description"]
 
                     };
+
+                    if (reader["user_title_description"] != DBNull.Value)
+                    {
+                        user.UserTitle = (string)reader["user_title_description"];
+                    }
+
+                    if (reader["user_about_me"] != DBNull.Value)
+                    {
+                        user.UserDescription = (string)reader["user_about_me"];
+                    }
+
                     if (reader["user_profile_img"] == DBNull.Value)
                     {
                         // Asigna una imagen predeterminada
@@ -78,7 +87,6 @@ namespace PortalEmpleo.Utils
 
 		public static List<Role> BringRoles()
 		{
-			SqlConnectionStringBuilder connectionString = new SqlConnectionStringBuilder();
 
             var cs = DBHelper.GetConnectionString();
 

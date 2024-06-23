@@ -14,6 +14,7 @@ namespace PortalEmpleo.Models
 		public byte[] UserProfileImg { get; set; }
 		public int UserAge { get; set; }
 		public string UserTitle { get; set; }
+        public string UserDescription { get; set; }
         public string RoleDescription { get; set; }
         public Role Role { get; set; }
         public List<Post> Posts { get; set; }

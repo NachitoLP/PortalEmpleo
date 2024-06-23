@@ -3,14 +3,6 @@
 }
 @model UserProfileViewModel
 
-
-@if (ViewData.ModelState.ContainsKey(""))
-{
-    <div class="alert alert-danger" role="alert">
-        @Html.ValidationSummary(false, null, new { @class = "text-danger" })
-    </div>
-}
-
 <form asp-action="ModifyProfile" method="post" enctype="multipart/form-data" class="form_mod_perfil">
     <div class="form-group div_perfil">
         <div class="div_img_perfi">
@@ -50,6 +42,12 @@
             <label asp-for="UserTitle">Título:</label>
             <input asp-for="UserTitle" class="form-control" />
             <span asp-validation-for="UserTitle" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="UserDescription">Sobre mí:</label>
+            <textarea asp-for="UserDescription" style="resize: none; height:72px;" class="form-control"></textarea>
+            <span asp-validation-for="UserDescription" class="text-danger"></span>
         </div>
 
         <div class="form-group">

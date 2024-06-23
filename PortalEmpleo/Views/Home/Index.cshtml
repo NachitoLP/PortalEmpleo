@@ -2,94 +2,164 @@
     ViewData["Title"] = "Home Page";
 }
 
-<header class="container-fluid header">
-    <nav class="navbar navbar-expand-lg bg-body-tertiary">
-        <div class="container-fluid">
-            <h3 class="navbar-brand">LinkedOut</h3>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item">
-                        <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-dark" asp-area="" asp-controller="Employments" asp-action="Index">Employments</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                    </li>
-                </ul>
-                @* <form class="d-flex" asp-controller="Employments" role="search" asp-action="Index">
-                    <input class="form-control me-2" placeholder="Buscar..." aria-label="search" name="search">
-                    <button class="btn btn-outline-success" style="color:white; border:none;" type="submit"><span class="material-symbols-outlined">search</span></button>
-                </form> *@
+@model PortalEmpleo.Models.HomeView
 
-                <div class="icons_header_login">
-                    @if (User.Identity.IsAuthenticated)
+<div id="body_posts">
+
+    <header class="container-fluid header">
+        <nav class="navbar navbar-expand-lg bg-body-tertiary">
+            <div class="container-fluid">
+                <h3 class="navbar-brand">LinkedOut</h3>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Employments" asp-action="Index">Employments</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                        </li>
+                    </ul>
+
+                    <div class="icons_header_login">
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <a asp-controller="Profile" asp-action="Index">
+                                <div class="nav_login">
+                                    <span class="material-symbols-outlined">person</span>
+                                    <label>Mi Perfil</label>
+                                </div>
+                            </a>
+                            <a asp-controller="Logout" asp-action="Index">
+                                <div class="nav_login">
+                                    <span class="material-symbols-outlined">logout</span>
+                                    <label>Salir</label>
+                                </div>
+                            </a>
+                        }
+                        else
+                        {
+                            <a asp-controller="Login" asp-action="Index">
+                                <div class="nav_login">
+                                    <span class="material-symbols-outlined">person</span>
+                                    <label>Ingresar</label>
+                                </div>
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+
+    <div style="display:flex;justify-content:center;flex-direction:column;width:300px;margin:auto;">
+        <div style="width:100%;margin-bottom:10px;"><button id="btnMostrarCrearPublicacion" class="btn btn-success" style="width:100%">Crear Publicación</button></div>
+        <div>
+            <label style="display:block;text-align:center;">Filtrar por categoría:</label>
+            <form id="formFiltrarPosts" style="display:inline-flex;align-items:center;">
+                <div class="form-group" style="width:300px;margin-right:5px;">
+                    <select id="categoria" class="form-control">
+                        <option value=""></option>
+                        @foreach (var category in Model.Categories)
+                        {
+                            <option value="@category.CategoryId">@category.CategoryName</option>
+                        }
+                    </select>
+                </div>
+                <span class="material-symbols-outlined" style="cursor: pointer;" onclick="$('#formFiltrarPosts').submit()">search</span>
+            </form>
+        </div>
+    </div>
+    <br />
+    <div class="div_all_posts">
+        @foreach (var post in Model.Posts)
+        {
+            <div class="div_post">
+                <div class="div_post_profile">
+                    @if (post.UserProfileImg != null)
                     {
-                        <a asp-controller="Profile" asp-action="Index">
-                            <div class="nav_login">
-                                <span class="material-symbols-outlined">person</span>
-                                <label>Mi Perfil</label>
-                            </div>
-                        </a>
-                        <a asp-controller="Logout" asp-action="Index">
-                            <div class="nav_login">
-                                <span class="material-symbols-outlined">logout</span>
-                                <label>Salir</label>
-                            </div>
-                        </a>
+                        <img src="data:image;base64,@Convert.ToBase64String(post.UserProfileImg)" class="post_profile_image" />
                     }
                     else
                     {
-                        <a asp-controller="Login" asp-action="Index">
-                            <div class="nav_login">
-                                <span class="material-symbols-outlined">person</span>
-                                <label>Ingresar</label>
-                            </div>
-                        </a>
+                        <img src="Images/perfil_df.jpg" class="post_profile_image" />
+                    }
+                    <div style="display:flex;flex-direction:column;">
+                        <p style="margin-bottom: 0px;"><strong>@post.UserName</strong></p>
+                        <p style="font-size:14px; margin-bottom: 0px;">@post.UserTitle</p>
+                    </div>
+                </div>
+                <div class="div_post_info">
+                    <p style="font-size:12px;">@post.PostDate</p>
+                    <h3>@post.PostTitle</h3>
+                    <p>@post.PostDescription</p>
+                    @if (post.PostImage != null)
+                    {
+                        <img src="data:image;base64,@Convert.ToBase64String(post.PostImage)" alt="Imagen del post" style="" />
                     }
                 </div>
             </div>
-        </div>
-    </nav>
-</header>
-
-@model List<Post>
-
-<div class="div_all_posts">
-    @foreach (var post in Model)
-    {
-        <div class="div_post">
-            <div class="div_post_profile">
-                @if (post.UserProfileImg != null)
-                {
-                    <img src="data:image;base64,@Convert.ToBase64String(post.UserProfileImg)" class="post_profile_image" />
-                }
-                else
-                {
-                    <img src="Images/perfil_df.jpg" class="post_profile_image" />
-                }
-                <div style="display:flex;flex-direction:column;">
-                    <p style="margin-bottom: 0px;"><strong>@post.UserName</strong></p>
-                    <p style="font-size:14px; margin-bottom: 0px;">@post.UserTitle</p>
-                </div>
-            </div>
-            <div class="div_post_info">
-                <p style="font-size:12px;">@post.PostDate</p>
-                <h3>@post.PostTitle</h3>
-                <p>@post.PostDescription</p>
-                @if (post.PostImage != null)
-                {
-                    <img src="@post.PostImage" alt="Imagen del post" style="max-width: 100px; max-height: 100px;" />
-                }
-                else
-                {
-                    <img src="Images/techpro.jpg"/>
-                }
-            </div>
-        </div>
-    }
+        }
+    </div>
 </div>
+
+<div id="overlay"></div>
+
+<div id="modalCrearPublicacion" class="modal">
+    <div class="modal-content">
+        <span id="btnCerrarCrearPublicacion" class="material-symbols-outlined close">
+            close
+        </span>
+        @await Html.PartialAsync("_CreatePost", new PortalEmpleo.Models.PostViewModel { Categories = Model.Categories })
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $('#btnMostrarCrearPublicacion').on('click',function () {
+            $('#overlay').fadeIn();
+            $('body').addClass('body_modal_open');
+            $('#body_posts').addClass('body_opacity');
+            $('#modalCrearPublicacion').fadeIn();
+        });
+
+        $('#btnCerrarCrearPublicacion').on('click',function () {
+            $('#overlay').fadeOut();
+            $('body').removeClass('body_modal_open');
+            $('#body_posts').removeClass('body_opacity');
+            $('#modalCrearPublicacion').fadeOut();
+        });
+    });
+</script>
+
+<script>
+    $(document).ready(function () {
+        $('#formFiltrarPosts').submit(function (event) {
+            event.preventDefault(); // Evita el comportamiento por defecto del formulario
+            var categoryId = $('#categoria').val(); // Obtiene el valor seleccionado del select
+            if (categoryId === "") {
+                // Redirige al index si se selecciona "Todas las categorías"
+                window.location.href = '/Home';
+                return; // Detiene la ejecución del script
+            }
+            $.ajax({
+                url: '/Home/GetPostsByCategory', // Ajusta la URL según tu configuración y controlador
+                type: 'POST',
+                data: { categoryId: categoryId }, // Envía el ID de la categoría seleccionada al servidor
+                success: function (response) {
+                    // Actualiza la lista de posts con la respuesta del servidor
+                    $('.div_all_posts').html(response);
+                },
+                error: function (error) {
+                    console.error('Error al intentar filtrar posts:', error);
+                }
+            });
+        });
+    });
+</script>
