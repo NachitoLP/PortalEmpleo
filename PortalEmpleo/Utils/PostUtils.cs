@@ -69,6 +69,7 @@ namespace PortalEmpleo.Utils
                         }
 
                         posts.Add(post);
+
                     }
 
                     reader.Close();
@@ -196,6 +197,78 @@ namespace PortalEmpleo.Utils
             }
 
             return posts;
+        }
+
+        public static Post GetPostById(int postId)
+        {
+            var cs = DBHelper.GetConnectionString();
+            var post = new Post();
+
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(cs))
+                {
+                    connection.Open();
+
+                    string sqlQuery = @"
+                    SELECT p.post_id, p.post_title, p.post_description, p.post_image, 
+                           p.user_id, u.user_name, u.user_surname, u.user_profile_img, u.user_title_description,
+                           p.category_id, c.category_name, p.post_date
+                    FROM dbo.Posts p
+                    LEFT JOIN dbo.Users u ON p.user_id = u.user_id
+                    LEFT JOIN dbo.Category c ON p.category_id = c.category_id
+                    WHERE p.post_id = @PostId";
+
+                    SqlCommand cmd = new SqlCommand(sqlQuery, connection);
+                    cmd.Parameters.AddWithValue("@PostId", postId);
+
+                    var reader = cmd.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        post = new Post
+                        {
+                            PostId = reader.GetInt32(reader.GetOrdinal("post_id")),
+                            PostTitle = reader.GetString(reader.GetOrdinal("post_title")),
+                            PostDescription = reader.GetString(reader.GetOrdinal("post_description")),
+                            UserId = reader.GetInt32(reader.GetOrdinal("user_id")),
+                            UserName = $"{reader.GetString(reader.GetOrdinal("user_name"))} {reader.GetString(reader.GetOrdinal("user_surname"))}",
+                            CategoryId = reader.GetInt32(reader.GetOrdinal("category_id")),
+                            CategoryName = reader.GetString(reader.GetOrdinal("category_name")),
+                            PostDate = reader.GetDateTime(reader.GetOrdinal("post_date"))
+                        };
+
+                        if (reader["post_image"] != DBNull.Value)
+                        {
+                            post.PostImage = (byte[])reader["post_image"];
+                        }
+
+                        if (reader["user_title_description"] != DBNull.Value)
+                        {
+                            post.UserTitle = reader.GetString(reader.GetOrdinal("user_title_description"));
+                        }
+
+                        if (reader["user_profile_img"] != DBNull.Value)
+                        {
+                            post.UserProfileImg = (byte[])reader["user_profile_img"];
+                        }
+                        else
+                        {
+                            byte[] defaultImageBytes = UserUtils2.ObtenerBytesImagenDefault();
+                            post.UserProfileImg = defaultImageBytes;
+                        }
+                    }
+
+                    reader.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                throw new Exception("Error al obtener el Post por ID.", ex);
+            }
+
+            return post;
         }
         public static List<Category> GetCategories()
         {

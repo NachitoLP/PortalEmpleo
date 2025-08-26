@@ -15,14 +15,7 @@
                     <li class="nav-item">
                         <a class="nav-link text-dark" asp-area="" asp-controller="Employments" asp-action="Index">Employments</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                    </li>
                 </ul>
-                @* <form class="d-flex" asp-controller="Employments" role="search" asp-action="Index">
-                <input class="form-control me-2" placeholder="Buscar..." aria-label="search" name="search">
-                <button class="btn btn-outline-success" style="color:white; border:none;" type="submit"><span class="material-symbols-outlined">search</span></button>
-                </form> *@
 
                 <div class="icons_header_login">
                     @if (User.Identity.IsAuthenticated)
@@ -63,71 +56,120 @@
     </div>
 }
 
-<div class="profile_container">
-    <div class="profile-header">
-        <div class="profile-img">
-            @if (Model.UserProfileImg != null)
-            {
-                <img src="data:image;base64,@Convert.ToBase64String(Model.UserProfileImg)" class="img-profile" />
-            }
-            else
-            {
-                <img src="Images/perfil_df.jpg" class="img-profile" />
-            }
-        </div>
-        <div class="profile-details">
-            <h2>@Model.UserName @Model.UserSurname</h2>
-            <p class="profile-title">@Model.UserTitle</p>
-            <p class="profile-info"><strong>Fecha de Nacimiento:</strong> @Model.UserBirthDate.ToString("dd/MM/yyyy")</p>
-            <p class="profile-info"><strong>Rol:</strong> @Model.RoleDescription</p>
-            <p class="profile-info" style="word-wrap: break-word; max-width:800px; text-align:justify;"><strong>Sobre mí:</strong> @Model.UserDescription</p>
-        </div>
-    </div>
-
-    @if (!string.IsNullOrEmpty(Model.FutureDateError))
-    {
-        <div class="alert alert-danger">@Model.FutureDateError</div>
-    }
-
-    <a asp-controller="Profile" asp-action="ModifyProfile" class="btn btn-primary">Modificar Perfil</a>
-</div>
-
-<br />
-<h4 style="text-align:center;">Tus publicaciones:</h4>
-
-<div class="div_all_posts">
-    @foreach (var post in Model.Posts)
-    {
-        <div class="div_post">
-            <div class="div_post_profile">
+<div id="body_posts">
+    <div class="profile_container">
+        <div class="profile-header">
+            <div class="profile-img">
                 @if (Model.UserProfileImg != null)
                 {
-                    <img src="data:image;base64,@Convert.ToBase64String(Model.UserProfileImg)" class="post_profile_image" />
+                    <img src="data:image;base64,@Convert.ToBase64String(Model.UserProfileImg)" class="img-profile" />
                 }
                 else
                 {
-                    <img src="Images/perfil_df.jpg" class="post_profile_image" />
+                    <img src="Images/perfil_df.jpg" class="img-profile" />
                 }
-                <div style="display:flex;flex-direction:column;">
-                    <p style="margin-bottom: 0px;"><strong>@Model.UserName @Model.UserSurname</strong></p>
-                    <p style="font-size:14px">@Model.UserTitle</p>
-                </div>
             </div>
-            <div class="div_post_info">
-                <p style="font-size:12px;">@post.PostDate</p>
-                <div class="delete_icon">
-                    <span class="material-symbols-outlined text-danger" style="cursor: pointer;" onclick="confirmarEliminacion(@post.PostId)">delete</span>
-                </div>
-                <h3>@post.PostTitle</h3>
-                <p>@post.PostDescription</p>
-                @if (post.PostImage != null)
-                {
-                    <img src="data:image;base64,@Convert.ToBase64String(post.PostImage)" alt="Imagen del post" style="" />
-                }
+            <div class="profile-details">
+                <h2>@Model.UserName @Model.UserSurname</h2>
+                <p class="profile-title">@Model.UserTitle</p>
+                <p class="profile-info"><strong>Fecha de Nacimiento:</strong> @Model.UserBirthDate.ToString("dd/MM/yyyy")</p>
+                <p class="profile-info"><strong>Rol:</strong> @Model.RoleDescription</p>
+                <p class="profile-info" style="word-wrap: break-word; max-width:800px; text-align:justify;"><strong>Sobre mí:</strong> @Model.UserDescription</p>
             </div>
         </div>
-    }
+
+        @if (!string.IsNullOrEmpty(Model.FutureDateError))
+        {
+            <div class="alert alert-danger">@Model.FutureDateError</div>
+        }
+
+        <a asp-controller="Profile" asp-action="ModifyProfile" class="btn btn-primary">Modificar Perfil</a>
+    </div>
+
+    <br />
+    <h4 style="text-align:center;">Tus publicaciones:</h4>
+
+    <div class="div_all_posts">
+        @foreach (var post in Model.Posts)
+        {
+            <div class="div_post">
+                <div class="div_post_profile">
+                    @if (Model.UserProfileImg != null)
+                    {
+                        <img src="data:image;base64,@Convert.ToBase64String(Model.UserProfileImg)" class="post_profile_image" />
+                    }
+                    else
+                    {
+                        <img src="Images/perfil_df.jpg" class="post_profile_image" />
+                    }
+                    <div style="display:flex;flex-direction:column;">
+                        <p style="margin-bottom: 0px;"><strong>@Model.UserName @Model.UserSurname</strong></p>
+                        <p style="font-size:14px">@Model.UserTitle</p>
+                    </div>
+                </div>
+                <div class="div_post_info">
+                    <p style="font-size:12px;">@post.PostDate</p>
+                    <div class="delete_icon">
+                        <button id="btnMostrarModificacion" style="border:none;background-color:transparent;"><span id="btnMostrarModificacion" class="material-symbols-outlined" style="cursor: pointer;">edit</span></button>
+                        <span class="material-symbols-outlined text-danger" style="cursor: pointer;" onclick="confirmarEliminacion(@post.PostId)">delete</span>
+                    </div>
+                    <h3>@post.PostTitle</h3>
+                    <p>@post.PostDescription</p>
+                    @if (post.PostImage != null)
+                    {
+                        <img src="data:image;base64,@Convert.ToBase64String(post.PostImage)" alt="Imagen del post" style="" />
+                    }
+                </div>
+            </div>
+        }
+    </div>
 </div>
+
+<div id="overlay"></div>
+
+<div id="modalModificarPost" class="modal">
+    <div class="modal-content">
+        <span id="btnCerrarModificacion" class="material-symbols-outlined close">
+            close
+        </span>
+        <div id="contenidoVistaParcial"></div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $('#btnMostrarModificacion').on('click', function () {
+            var postId = obtenerIdDelPost(); // Implementa esta función para obtener el ID del post
+
+            // Realizar petición AJAX
+            $.ajax({
+                url: '/Home/GetPostById',
+                type: 'GET',
+                data: { id: postId }, // Pasar el ID del post como parámetro GET
+                success: function (result) {
+                    // Agregar el contenido de la vista parcial al contenedor
+                    $('#contenidoVistaParcial').html(result);
+
+                    // Mostrar overlay y modal
+                    $('#overlay').fadeIn();
+                    $('body').addClass('body_modal_open');
+                    $('#body_posts').addClass('body_opacity');
+                    $('#modalModificarPost').fadeIn();
+                },
+                error: function () {
+                    alert('Error al cargar el post.');
+                }
+            });
+        });
+
+        $('#btnCerrarModificacion').on('click', function () {
+            $('#overlay').fadeOut();
+            $('body').removeClass('body_modal_open');
+            $('#body_posts').removeClass('body_opacity');
+            $('#modalModificarPost').fadeOut();
+        });
+    });
+</script>
 
 <script>
     function confirmarEliminacion(postId) {

@@ -108,9 +108,8 @@ namespace PortalEmpleo.Controllers
             }
             catch (Exception ex)
             {
-                // Manejar excepciones si es necesario
                 Console.WriteLine("Error al eliminar el post:", ex.Message);
-                return StatusCode(500); // Devolver un código de error HTTP 500 en caso de error
+                return StatusCode(500);
             }
         }
 
@@ -123,16 +122,14 @@ namespace PortalEmpleo.Controllers
                 var userEmail = HttpContext.User.Claims.FirstOrDefault(c => c.Type == "Correo")?.Value;
 
                 var user = UserUtils2.getUser(userEmail);
-                // Verifica si el usuario ha proporcionado una nueva imagen de perfil
+                
                 string sqlQuery;
                 if (model.NewProfileImage != null)
                 {
-                    // Si hay una nueva imagen de perfil, actualiza la consulta SQL para incluir la imagen de perfil
                     sqlQuery = "UPDATE dbo.Users SET user_name = @NewUserName, user_surname = @NewUserSurname, user_birth_date = @NewUserBD, user_profile_img = @NewUserPI, role_description = @NewUserRole, user_title_description = @UserTitle, user_about_me = @UserDescription WHERE user_email = @UserEmail";
                 }
                 else
                 {
-                    // Si no hay una nueva imagen de perfil, actualiza la consulta SQL para omitir la imagen de perfil
                     sqlQuery = "UPDATE dbo.Users SET user_name = @NewUserName, user_surname = @NewUserSurname, user_birth_date = @NewUserBD, role_description = @NewUserRole, user_title_description = @UserTitle, user_about_me = @UserDescription WHERE user_email = @UserEmail";
                 }
 
@@ -185,7 +182,6 @@ namespace PortalEmpleo.Controllers
                         cmd.Parameters.AddWithValue("@UserDescription", model.UserDescription);
                     }
 
-                    // Agrega el parámetro para la imagen de perfil solo si hay una nueva imagen de perfil
                     if (model.NewProfileImage != null)
                     {
                         using (var memoryStream = new MemoryStream())

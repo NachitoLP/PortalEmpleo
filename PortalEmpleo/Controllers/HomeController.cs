@@ -41,6 +41,38 @@ namespace PortalEmpleo.Controllers
             return PartialView("_PostsPartialView", posts);
         }
 
+        public IActionResult ModifyPost(int postId)
+        {
+            var post = PostUtils.GetPostById(postId);
+
+            try
+            {
+                PostViewModel viewModel = new PostViewModel
+                {
+                    PostId = post.PostId,
+                    PostTitle = post.PostTitle,
+                    PostDescription = post.PostDescription,
+                    PostImage = post.PostImage,
+                    UserId = post.UserId,
+                    CategoryId = post.CategoryId,
+                    PostDate = post.PostDate,
+                    PostModifiedDate = post.PostModifiedDate,
+                };
+
+                List<Category> categories = PostUtils.GetCategories();
+                viewModel.Categories = categories;
+
+                return View(viewModel);
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+
+                throw new Exception("Error al obtener los datos del usuario.", ex);
+            }
+        }
+
 
         [HttpPost]
         [Authorize]
